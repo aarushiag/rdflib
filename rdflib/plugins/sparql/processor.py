@@ -76,5 +76,4 @@ class SPARQLProcessor(Processor):
             query = translateQuery(parsetree, base, initNs)
         else:
             query = strOrQuery
-
         return evalQuery(self.graph, query, initBindings, base)
