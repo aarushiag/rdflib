@@ -16,6 +16,8 @@ from functools import reduce
 
 from rdflib import Literal, Variable, URIRef, BNode
 
+from rdflib.namespace import RDF
+
 from rdflib.plugins.sparql.sparql import Prologue, Query
 from rdflib.plugins.sparql.parserutils import CompValue, Expr
 from rdflib.plugins.sparql.operators import (
@@ -243,6 +245,46 @@ def collectAndRemoveFilters(parts):
 
     return None
 
+def collectExpandEmpTP(parts):
+    """
+
+    FILTER expressions apply to the whole group graph pattern in which
+    they appear.
+
+    http://www.w3.org/TR/sparql11-query/#sparqlCollectFilters
+    """
+
+
+
+    i = 0
+    while i < len(parts):
+        p = parts[i]
+        if p.name == 'TriplesBlock':
+            newTriples = []
+            for t in p.triples:
+                if isinstance(t[0], CompValue) and t[0].name == 'EmpTP':
+                    r = Variable('__EMP_s_'+ str(i))
+                    e = t[0]
+                    t[0] = r
+                    newTriples.append([e.s[0], e.p[0], e.o[0]])
+                    t.extend([r, RDF.type, RDF.Statement,
+                                       r, RDF.subject, e.s[0],
+                                       r, RDF.predicate, e.p[0],
+                                       r, RDF.object, e.o[0]])
+                if isinstance(t[2], CompValue) and t[2].name == 'EmpTP':
+                    r = Variable('__EMP_o_'+str(i))
+                    e = t[2]
+                    t[2] = r
+                    newTriples.append([e.s[0], e.p[0], e.o[0]])
+                    newTriples.append([r, RDF.type, RDF.Statement,
+                                       r, RDF.subject, e.s[0],
+                                       r, RDF.predicate, e.p[0],
+                                       r, RDF.object, e.o[0]])
+            for t in newTriples:
+                p.triples.append(t)
+        i += 1
+
+    return parts
 
 def translateGroupOrUnionGraphPattern(graphPattern):
     A = None
@@ -278,6 +320,7 @@ def translateGroupGraphPattern(graphPattern):
 
     filters = collectAndRemoveFilters(graphPattern.part)
 
+    graphPattern.part = collectExpandEmpTP(graphPattern.part)
     g = []
     for p in graphPattern.part:
         if p.name == 'TriplesBlock':
@@ -346,11 +389,9 @@ def _traverse(e, visitPre=lambda n: None, visitPost=lambda n: None):
         return tuple([_traverse(x, visitPre, visitPost) for x in e])
 
     elif isinstance(e, CompValue):
-        if e.name != 'EmpTP':
-            for k, val in e.items():
-                e[k] = _traverse(val, visitPre, visitPost)
-        else:
-            raise Exception("Sparql star not tied into the algebra jet")
+        for k, val in e.items():
+            e[k] = _traverse(val, visitPre, visitPost)
+
     _e = visitPost(e)
     if _e is not None:
         return _e

@@ -24,7 +24,7 @@ from six import binary_type, unichr
 
 import rdflib
 
-DEBUG = True
+DEBUG = False
 
 # ---------------- ACTIONS
 
