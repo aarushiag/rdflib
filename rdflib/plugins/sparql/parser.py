@@ -393,6 +393,9 @@ GraphTerm = iri | RDFLiteral | NumericLiteral | BooleanLiteral | BlankNode | NIL
 # [106] VarOrTerm ::= Var | GraphTerm
 VarOrTerm = Var | GraphTerm
 
+
+
+
 # [107] VarOrIri ::= Var | iri
 VarOrIri = Var | iri
 
@@ -428,8 +431,13 @@ TriplesNodePath = Forward()
 # [104] GraphNode ::= VarOrTerm | TriplesNode
 GraphNode = VarOrTerm | TriplesNode
 
+VarOrBlankNodeOrIriOrLitOrEmbTP = Var | BlankNode | iri | RDFLiteral | NumericLiteral | BooleanLiteral
+EmbTP = Suppress('<<') + VarOrBlankNodeOrIriOrLitOrEmbTP + Verb + VarOrBlankNodeOrIriOrLitOrEmbTP + Suppress('>>')
+
+VarOrTermOrEmbTP = Var | GraphTerm | EmbTP
+
 # [105] GraphNodePath ::= VarOrTerm | TriplesNodePath
-GraphNodePath = VarOrTerm | TriplesNodePath
+GraphNodePath = VarOrTermOrEmbTP | TriplesNodePath
 
 
 # [93] PathMod ::= '?' | '*' | '+'
@@ -471,6 +479,12 @@ Path <<= PathAlternative
 # [84] VerbPath ::= Path
 VerbPath = Path
 
+# See
+VarOrBlankNodeOrIriOrLitOrEmbTP = Var | BlankNode | iri | RDFLiteral | NumericLiteral | BooleanLiteral
+EmbTP = Combine(Suppress('<<'), VarOrBlankNodeOrIriOrLitOrEmbTP + Verb + VarOrBlankNodeOrIriOrLitOrEmbTP, Suppress('>>'))
+
+VarOrTermOrEmbTP = Var | GraphTerm | EmbTP
+
 # [87] ObjectPath ::= GraphNodePath
 ObjectPath = GraphNodePath
 
@@ -490,7 +504,7 @@ CollectionPath = Suppress('(') + OneOrMore(GraphNodePath) + Suppress(')')
 CollectionPath.setParseAction(expandCollection)
 
 # [80] Object ::= GraphNode
-Object = GraphNode
+Object = GraphNode | EmbTP
 
 # [79] ObjectList ::= Object ( ',' Object )*
 ObjectList = Object + ZeroOrMore(',' + Object)
@@ -527,7 +541,7 @@ TriplesNode <<= (Collection | BlankNodePropertyList)
 TriplesNodePath <<= (CollectionPath | BlankNodePropertyListPath)
 
 # [75] TriplesSameSubject ::= VarOrTerm PropertyListNotEmpty | TriplesNode PropertyList
-TriplesSameSubject = VarOrTerm + PropertyListNotEmpty | TriplesNode + \
+TriplesSameSubject = VarOrTermOrEmbTP + PropertyListNotEmpty | TriplesNode + \
     PropertyList
 TriplesSameSubject.setParseAction(expandTriples)
 
@@ -551,7 +565,7 @@ QuadPattern = '{' + Param('quads', Quads) + '}'
 QuadData = '{' + Param('quads', Quads) + '}'
 
 # [81] TriplesSameSubjectPath ::= VarOrTerm PropertyListPathNotEmpty | TriplesNodePath PropertyListPath
-TriplesSameSubjectPath = VarOrTerm + \
+TriplesSameSubjectPath = VarOrTermOrEmbTP + \
     PropertyListPathNotEmpty | TriplesNodePath + PropertyListPath
 TriplesSameSubjectPath.setParseAction(expandTriples)
 
@@ -916,7 +930,6 @@ ConstructTriples <<= (ParamList('template', TriplesSameSubject) + Optional(
 # [73] ConstructTemplate ::= '{' Optional(ConstructTriples) '}'
 ConstructTemplate = Suppress('{') + Optional(ConstructTriples) + Suppress('}')
 
-
 # [57] OptionalGraphPattern ::= 'OPTIONAL' GroupGraphPattern
 OptionalGraphPattern = Comp('OptionalGraphPattern', Keyword(
     'OPTIONAL') + Param('graph', GroupGraphPattern))
@@ -929,9 +942,11 @@ GraphGraphPattern = Comp('GraphGraphPattern', Keyword(
 ServiceGraphPattern = Comp('ServiceGraphPattern', Keyword(
     'SERVICE') + _Silent + Param('term', VarOrIri) + Param('graph', GroupGraphPattern))
 
+ExpressionOrEmbTP = Expression | EmbTP
+
 # [60] Bind ::= 'BIND' '(' Expression 'AS' Var ')'
 Bind = Comp('Bind', Keyword('BIND') + '(' + Param(
-    'expr', Expression) + Keyword('AS') + Param('var', Var) + ')')
+    'expr', ExpressionOrEmbTP) + Keyword('AS') + Param('var', Var) + ')')
 
 # [61] InlineData ::= 'VALUES' DataBlock
 InlineData = Comp('InlineData', Keyword('VALUES') + DataBlock)

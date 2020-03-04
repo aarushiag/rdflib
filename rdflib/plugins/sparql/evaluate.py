@@ -24,7 +24,7 @@ from rdflib import Variable, Graph, BNode, URIRef, Literal
 from six import iteritems, itervalues
 
 from rdflib.plugins.sparql import CUSTOM_EVALS
-from rdflib.plugins.sparql.parserutils import value
+from rdflib.plugins.sparql.parserutils import value, CompValue
 from rdflib.plugins.sparql.sparql import (
     QueryContext, AlreadyBound, FrozenBindings, Bindings, SPARQLError)
 from rdflib.plugins.sparql.evalutils import (
@@ -122,6 +122,21 @@ def evalUnion(ctx, union):
     for x in evalPart(ctx, union.p2):
         yield x
 
+# Embedded Triple Pattern
+def evalEmbTP(ctx, reif):
+    from rdflib import RDF
+    v = Variable('reif')
+
+    p = CompValue()
+    p.name = 'Project'
+    p.p = CompValue()
+    p.p.name = 'BGP'
+    p.p.triples = [[v, RDF.subject, reif[0]],
+                  [v,RDF.predicate, reif[1]],
+                  [v,RDF.object, reif[2]]
+                  ]
+    p.PV = [v]
+    return evalProject(ctx, p)
 
 def evalMinus(ctx, minus):
     a = evalPart(ctx, minus.p1)
