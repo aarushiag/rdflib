@@ -24,7 +24,7 @@ from six import binary_type, unichr
 
 import rdflib
 
-DEBUG = False
+DEBUG = True
 
 # ---------------- ACTIONS
 
@@ -431,8 +431,9 @@ TriplesNodePath = Forward()
 # [104] GraphNode ::= VarOrTerm | TriplesNode
 GraphNode = VarOrTerm | TriplesNode
 
+#Should be recursive but it is not yet so
 VarOrBlankNodeOrIriOrLitOrEmbTP = Var | BlankNode | iri | RDFLiteral | NumericLiteral | BooleanLiteral
-EmbTP = Suppress('<<') + VarOrBlankNodeOrIriOrLitOrEmbTP + Verb + VarOrBlankNodeOrIriOrLitOrEmbTP + Suppress('>>')
+EmbTP = Suppress('<<') + Comp('EmpTP',ParamList('s', VarOrBlankNodeOrIriOrLitOrEmbTP) + ParamList('p', Verb) + ParamList('o', VarOrBlankNodeOrIriOrLitOrEmbTP)) + Suppress('>>')
 
 VarOrTermOrEmbTP = Var | GraphTerm | EmbTP
 

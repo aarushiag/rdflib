@@ -67,6 +67,8 @@ def Filter(expr, p):
 def Extend(p, expr, var):
     return CompValue('Extend', p=p, expr=expr, var=var)
 
+def EmpTP(p, o):
+    return CompValue('EmpTP', var=o)
 
 def Values(res):
     return CompValue('values', res=res)
@@ -133,6 +135,7 @@ def triples(l):
     l = reduce(lambda x, y: x + y, l)
     if (len(l) % 3) != 0:
         raise Exception('these aint triples')
+
     return reorderTriples((l[x], l[x + 1], l[x + 2])
                           for x in range(0, len(l), 3))
 
@@ -307,7 +310,8 @@ def translateGroupGraphPattern(graphPattern):
             G = Join(p1=G, p2=p)
         elif p.name == 'Bind':
             G = Extend(G, p.expr, p.var)
-
+        elif p.name == "EmpTP":
+            G = Project(p, p.o)
         else:
             raise Exception('Unknown part in GroupGraphPattern: %s - %s' %
                             (type(p), p.name))
@@ -342,9 +346,11 @@ def _traverse(e, visitPre=lambda n: None, visitPost=lambda n: None):
         return tuple([_traverse(x, visitPre, visitPost) for x in e])
 
     elif isinstance(e, CompValue):
-        for k, val in e.items():
-            e[k] = _traverse(val, visitPre, visitPost)
-
+        if e.name != 'EmpTP':
+            for k, val in e.items():
+                e[k] = _traverse(val, visitPre, visitPost)
+        else:
+            raise Exception("Sparql star not tied into the algebra jet")
     _e = visitPost(e)
     if _e is not None:
         return _e
@@ -681,6 +687,9 @@ def translatePrologue(p, base, initNs=None, prologue=None):
 
     return prologue
 
+
+def translateEmbTP(u):
+    return u
 
 def translateQuads(quads):
     if quads.triples:
