@@ -437,6 +437,53 @@ class BNode(Identifier):
         skolem = "%s%s" % (basepath, text_type(self))
         return URIRef(urljoin(authority, skolem))
 
+class Triple(Identifier):
+    """
+    Triple: Needed for RDF*
+
+    """
+    __slots__ = ()
+
+    def __new__(cls, sid=None,
+                subject=None, predicate=None, object=None):
+        triple = Identifier.__new__(cls, [subject, predicate, object, sid])
+
+
+    def toPython(self):
+        return text_type(self)
+
+    def n3(self, namespace_manager=None):
+        return "_:%s" % self
+
+    def __getnewargs__(self):
+        return (text_type(self), )
+
+    if PY2:
+        def __str__(self):
+            return self.encode()
+
+    def __repr__(self):
+        if self.__class__ is BNode:
+            clsName = "rdflib.term.Triple"
+        else:
+            clsName = self.__class__.__name__
+        return """%s('%s')""" % (clsName, str(self))
+
+    def asQuad(self):
+        _subject = self.value[0]
+        _predicate = self.value[1]
+        _object = self.value[2]
+        _sid = self.value[3]
+        _rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+        _type = URIRef('type',base=_rdf)
+        _rdf_object = URIRef('object', base=_rdf)
+        _rdf_predicate = URIRef('predicate', base=_rdf)
+        _rdf_subject = URIRef('subject', base=_rdf)
+        _rdf_statement = URIRef('Statement', base=_rdf)
+        return [[_sid, _type , _rdf_statement],
+                [_sid , _rdf_object, _object],
+                [_sid, _rdf_predicate, _predicate],
+                [_sid, _rdf_subject, _subject]]
 
 class Literal(Identifier):
     __doc__ = """
