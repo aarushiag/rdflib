@@ -479,9 +479,6 @@ Path <<= PathAlternative
 # [84] VerbPath ::= Path
 VerbPath = Path
 
-# See
-VarOrBlankNodeOrIriOrLitOrEmbTP = Var | BlankNode | iri | RDFLiteral | NumericLiteral | BooleanLiteral
-EmbTP = Combine(Suppress('<<'), VarOrBlankNodeOrIriOrLitOrEmbTP + Verb + VarOrBlankNodeOrIriOrLitOrEmbTP, Suppress('>>'))
 
 VarOrTermOrEmbTP = Var | GraphTerm | EmbTP
 
