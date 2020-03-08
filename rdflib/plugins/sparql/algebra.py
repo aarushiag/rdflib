@@ -14,7 +14,7 @@ import collections
 
 from functools import reduce
 
-from rdflib import Literal, Variable, URIRef, BNode
+from rdflib import Literal, Variable, URIRef, BNode, EmbeddedTriple
 
 from rdflib.namespace import RDF
 
@@ -245,47 +245,6 @@ def collectAndRemoveFilters(parts):
 
     return None
 
-def collectExpandEmpTP(parts):
-    """
-
-    FILTER expressions apply to the whole group graph pattern in which
-    they appear.
-
-    http://www.w3.org/TR/sparql11-query/#sparqlCollectFilters
-    """
-
-
-
-    i = 0
-    while i < len(parts):
-        p = parts[i]
-        if p.name == 'TriplesBlock':
-            newTriples = []
-            for t in p.triples:
-                if isinstance(t[0], CompValue) and t[0].name == 'EmpTP':
-                    r = Variable('__EMP_s_'+ str(i))
-                    e = t[0]
-                    t[0] = r
-                    newTriples.append([e.s[0], e.p[0], e.o[0]])
-                    t.extend([r, RDF.type, RDF.Statement,
-                                       r, RDF.subject, e.s[0],
-                                       r, RDF.predicate, e.p[0],
-                                       r, RDF.object, e.o[0]])
-                if isinstance(t[2], CompValue) and t[2].name == 'EmpTP':
-                    r = Variable('__EMP_o_'+str(i))
-                    e = t[2]
-                    t[2] = r
-                    newTriples.append([e.s[0], e.p[0], e.o[0]])
-                    newTriples.append([r, RDF.type, RDF.Statement,
-                                       r, RDF.subject, e.s[0],
-                                       r, RDF.predicate, e.p[0],
-                                       r, RDF.object, e.o[0]])
-            for t in newTriples:
-                p.triples.append(t)
-        i += 1
-
-    return parts
-
 def translateGroupOrUnionGraphPattern(graphPattern):
     A = None
 
@@ -320,7 +279,6 @@ def translateGroupGraphPattern(graphPattern):
 
     filters = collectAndRemoveFilters(graphPattern.part)
 
-    graphPattern.part = collectExpandEmpTP(graphPattern.part)
     g = []
     for p in graphPattern.part:
         if p.name == 'TriplesBlock':
@@ -353,8 +311,6 @@ def translateGroupGraphPattern(graphPattern):
             G = Join(p1=G, p2=p)
         elif p.name == 'Bind':
             G = Extend(G, p.expr, p.var)
-        elif p.name == "EmpTP":
-            G = Project(p, p.o)
         else:
             raise Exception('Unknown part in GroupGraphPattern: %s - %s' %
                             (type(p), p.name))
@@ -727,10 +683,6 @@ def translatePrologue(p, base, initNs=None, prologue=None):
             prologue.bind(x.prefix, prologue.absolutize(x.iri))
 
     return prologue
-
-
-def translateEmbTP(u):
-    return u
 
 def translateQuads(quads):
     if quads.triples:

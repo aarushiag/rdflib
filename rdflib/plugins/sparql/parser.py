@@ -432,8 +432,15 @@ TriplesNodePath = Forward()
 GraphNode = VarOrTerm | TriplesNode
 
 #Should be recursive but it is not yet so
+#VarOrBlankNodeOrIriOrLitOrEmbTP = Forward()
+#VarOrBlankNodeOrIriOrLitOrEmbTP <<= Var | BlankNode | iri | RDFLiteral | NumericLiteral | BooleanLiteral | VarOrBlankNodeOrIriOrLitOrEmbTP
 VarOrBlankNodeOrIriOrLitOrEmbTP = Var | BlankNode | iri | RDFLiteral | NumericLiteral | BooleanLiteral
-EmbTP = Suppress('<<') + Comp('EmpTP',ParamList('s', VarOrBlankNodeOrIriOrLitOrEmbTP) + ParamList('p', Verb) + ParamList('o', VarOrBlankNodeOrIriOrLitOrEmbTP)) + Suppress('>>')
+EmbTP = Suppress('<<') + VarOrBlankNodeOrIriOrLitOrEmbTP + Verb+ VarOrBlankNodeOrIriOrLitOrEmbTP + Suppress('>>')
+EmbTP.setParseAction(lambda x:
+                     rdflib.EmbeddedTriple(subject=x[0],
+                                           predicate=x[1],
+                                           object=x[2])
+                 )
 
 VarOrTermOrEmbTP = Var | GraphTerm | EmbTP
 
