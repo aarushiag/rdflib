@@ -35,6 +35,7 @@ __all__ = [
     'URIRef',
     'BNode',
     'Literal',
+    'EmbeddedTriple',
 
     'Variable',
     'Statement',
@@ -437,53 +438,64 @@ class BNode(Identifier):
         skolem = "%s%s" % (basepath, text_type(self))
         return URIRef(urljoin(authority, skolem))
 
-class Triple(Identifier):
+class EmbeddedTriple:
     """
     Triple: Needed for RDF*
 
     """
-    __slots__ = ()
+    _subject = None
+    _predicate = None
+    _object = None
+    _sid = None
 
-    def __new__(cls, sid=None,
-                subject=None, predicate=None, object=None):
-        triple = Identifier.__new__(cls, [subject, predicate, object, sid])
+    def __init__(self, sid=None,
+                 subject=None, predicate=None, object=None):
+        self._subject = subject
+        self._predicate = predicate
+        self._object = object
+        self._sid = sid
 
 
     def toPython(self):
-        return text_type(self)
+        return text_type(self._subject) + text_type(self._predicate) + text_type(self._object)
 
     def n3(self, namespace_manager=None):
-        return "_:%s" % self
-
-    def __getnewargs__(self):
-        return (text_type(self), )
+        return "triple:%s" % self
 
     if PY2:
         def __str__(self):
-            return self.encode()
+            return self._subject.encode() + self._predicate.encode() + self._object.encode()
 
     def __repr__(self):
-        if self.__class__ is BNode:
-            clsName = "rdflib.term.Triple"
+        if self.__class__ is EmbeddedTriple:
+            clsName = "rdflib.term.EmbeddedTriple"
         else:
             clsName = self.__class__.__name__
-        return """%s('%s')""" % (clsName, str(self))
+        return """%s('%s','%s','%s')""" % (clsName, str(self._subject),str(self._predicate),str(self._object))
 
     def asQuad(self):
-        _subject = self.value[0]
-        _predicate = self.value[1]
-        _object = self.value[2]
-        _sid = self.value[3]
         _rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
         _type = URIRef('type',base=_rdf)
         _rdf_object = URIRef('object', base=_rdf)
         _rdf_predicate = URIRef('predicate', base=_rdf)
         _rdf_subject = URIRef('subject', base=_rdf)
         _rdf_statement = URIRef('Statement', base=_rdf)
-        return [[_sid, _type , _rdf_statement],
-                [_sid , _rdf_object, _object],
-                [_sid, _rdf_predicate, _predicate],
-                [_sid, _rdf_subject, _subject]]
+        return [[self._sid, _type , _rdf_statement],
+                [self._sid , _rdf_object, self. object],
+                [self._sid, _rdf_predicate, self._predicate],
+                [self._sid, _rdf_subject, self._subject]]
+
+    def subject(self):
+        return self._subject
+
+    def predicate(self):
+        return self._predicate
+
+    def object(self):
+        return self._object
+
+    def sid(self):
+        return self._sid
 
 class Literal(Identifier):
     __doc__ = """

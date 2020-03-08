@@ -53,6 +53,7 @@ __all__ = [
     'BNode',
     'Literal',
     'Variable',
+    'EmbeddedTriple',
 
     'Namespace',
 
@@ -157,7 +158,7 @@ Literal work, eq, __neq__, __lt__, etc.
 """
 
 from rdflib.term import (
-    URIRef, BNode, Literal, Variable)
+    URIRef, BNode, Literal, Variable, EmbeddedTriple)
 
 from rdflib.namespace import Namespace
 

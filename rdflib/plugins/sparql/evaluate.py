@@ -17,7 +17,7 @@ also return a dict of list of dicts
 import collections
 import itertools
 
-from rdflib import Variable, Graph, BNode, URIRef, Literal
+from rdflib import Variable, Graph, BNode, URIRef, Literal, EmbeddedTriple
 from six import iteritems, itervalues
 
 from rdflib.plugins.sparql import CUSTOM_EVALS
@@ -45,6 +45,7 @@ def evalBGP(ctx, bgp):
     _s = ctx[s]
     _p = ctx[p]
     _o = ctx[o]
+
 
     for ss, sp, so in ctx.graph.triples((_s, _p, _o)):
         if None in (_s, _p, _o):
@@ -123,14 +124,10 @@ def evalEmbTP(ctx, reif):
     from rdflib import RDF
     v = Variable('reif')
 
-    p = CompValue()
-    p.name = 'Project'
-    p.p = CompValue()
-    p.p.name = 'BGP'
-    p.p.triples = [[v, RDF.subject, reif[0]],
-                  [v,RDF.predicate, reif[1]],
-                  [v,RDF.object, reif[2]]
-                  ]
+    p = CompValue('Project')
+    p.p = CompValue('BGP')
+
+    p.p.triples = [v, RDF.subject,reif.subject(), v,RDF.predicate, reif.predicate(), v,RDF.object, reif.object()]
     p.PV = [v]
     return evalProject(ctx, p)
 
@@ -251,7 +248,8 @@ def evalPart(ctx, part):
         return evalExtend(ctx, part)
     elif part.name == 'Minus':
         return evalMinus(ctx, part)
-
+    elif part.name == 'EmbTP':
+        return evalEmbTP(ctx, part)
     elif part.name == 'Project':
         return evalProject(ctx, part)
     elif part.name == 'Slice':
