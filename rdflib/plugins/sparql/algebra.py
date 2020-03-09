@@ -154,6 +154,16 @@ def translatePName(p, prologue):
                            datatype=prologue.absolutize(p.datatype))
     elif isinstance(p, URIRef):
         return prologue.absolutize(p)
+    elif isinstance(p, EmbeddedTriple):
+        trSub = translatePName(p.subject(), prologue)
+        trPred = translatePName(p.predicate(), prologue)
+        trObj = translatePName(p.object(), prologue)
+        if trSub is not None:
+            p.setSubject(trSub)
+        if trPred is not None:
+            p.setPredicate(trPred)
+        if trObj is not None:
+            p.setObject(trObj)
 
 
 def translatePath(p):
