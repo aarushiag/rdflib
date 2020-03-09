@@ -495,6 +495,19 @@ class EmbeddedTriple:
     def sid(self):
         return self._sid
 
+    def setSubject(self, subject):
+        self._subject = subject
+
+    def setPredicate(self, predicate):
+        self._predicate = predicate
+
+    def setObject(self, object):
+        self._object = object
+
+    def sid(self, sid):
+        self._sid = sid
+
+
     def __ne__(self, other):
         return not self.__eq__(other)
 
@@ -506,7 +519,7 @@ class EmbeddedTriple:
                self._object == other._object
 
     def __hash__(self):
-        return hash(self._subject) | hash(self._predicate) | hash(self.predicate())
+        return hash(self._subject) | hash(self._predicate) | hash(self._object)
 
 class Literal(Identifier):
     __doc__ = """
