@@ -50,7 +50,6 @@ def evalBGP(ctx, bgp):
     _p = ctx[p]
     _o = ctx[o]
 
-
     for ss, sp, so in ctx.graph.triples((_s, _p, _o)):
         if None in (_s, _p, _o):
             c = ctx.push()
@@ -123,17 +122,29 @@ def evalUnion(ctx, union):
     for x in evalPart(ctx, union.p2):
         yield x
 
+def _convert_embedded_triple(reif, t, v):
+    if t[0] == reif and t[2] == reif:
+        return v, t[1], v
+    elif t[0] == reif:
+        return v, t[1], t[2]
+    elif t[2] == reif:
+        return t[0], t[1], v
+    else:
+        return t
+
 # Embedded Triple Pattern
-def evalEmbTP(ctx, reif):
+def reifyEmbTP(ctx, reif, part):
     from rdflib import RDF
-    v = Variable('reif')
+    v = Variable('__' + reif.toPython())
+    triples = list()
+    for t in part.triples:
+        triples.append(_convert_embedded_triple(reif, t, v))
 
-    p = CompValue('Project')
-    p.p = CompValue('BGP')
-
-    p.p.triples = [v, RDF.subject,reif.subject(), v,RDF.predicate, reif.predicate(), v,RDF.object, reif.object()]
-    p.PV = [v]
-    return evalProject(ctx, p)
+    triples.append([v, RDF.type, RDF.Statement])
+    triples.append([v, RDF.subject,reif.subject()])
+    triples.append([v, RDF.predicate, reif.predicate()])
+    triples.append([v, RDF.object, reif.object()])
+    part.triples = triples
 
 def evalMinus(ctx, minus):
     a = evalPart(ctx, minus.p1)
@@ -221,6 +232,15 @@ def evalMultiset(ctx, part):
     return evalPart(ctx, part.p)
 
 
+def findSetOfEmbeddedTriples(ctx, part):
+    setOfEmbededTriples=set()
+    for t in part.triples:
+        if isinstance(t[0], EmbeddedTriple) and t[0] not in setOfEmbededTriples:
+            setOfEmbededTriples.add(t[0])
+        if isinstance(t[2], EmbeddedTriple) and t[2] not in setOfEmbededTriples:
+            setOfEmbededTriples.add(t[2])
+    return setOfEmbededTriples
+
 def evalPart(ctx, part):
 
     # try custom evaluation functions
@@ -231,10 +251,15 @@ def evalPart(ctx, part):
             pass  # the given custome-function did not handle this part
 
     if part.name == 'BGP':
+        set_of_embeded_triples = findSetOfEmbeddedTriples(ctx, part)
+
         # Reorder triples patterns by number of bound nodes in the current ctx
         # Do patterns with more bound nodes first
-        triples = sorted(part.triples, key=lambda t: len([n for n in t if ctx[n] is None]))
 
+        if len(set_of_embeded_triples) != 0:
+            for embTp in set_of_embeded_triples:
+                reifyEmbTP(ctx, embTp, part)
+        triples = sorted(part.triples, key=lambda t: len([n for n in t if ctx[n] is None]))
         return evalBGP(ctx, triples)
     elif part.name == 'Filter':
         return evalFilter(ctx, part)
@@ -252,8 +277,6 @@ def evalPart(ctx, part):
         return evalExtend(ctx, part)
     elif part.name == 'Minus':
         return evalMinus(ctx, part)
-    elif part.name == 'EmbTP':
-        return evalEmbTP(ctx, part)
     elif part.name == 'Project':
         return evalProject(ctx, part)
     elif part.name == 'Slice':

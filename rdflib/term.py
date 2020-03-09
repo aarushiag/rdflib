@@ -454,9 +454,8 @@ class EmbeddedTriple:
         self._object = object
         self._sid = sid
 
-
     def toPython(self):
-        return text_type(self._subject) + text_type(self._predicate) + text_type(self._object)
+        return self._subject.toPython() + self._predicate.toPython() + self._object.toPython()
 
     def n3(self, namespace_manager=None):
         return "triple:%s" % self
@@ -495,6 +494,19 @@ class EmbeddedTriple:
 
     def sid(self):
         return self._sid
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __eq__(self, other):
+        if (not isinstance(other, self.__class__)):
+            return False
+        return self._subject == other._subject and  \
+               self._predicate == other._predicate and \
+               self._object == other._object
+
+    def __hash__(self):
+        return hash(self._subject) | hash(self._predicate) | hash(self.predicate())
 
 class Literal(Identifier):
     __doc__ = """
