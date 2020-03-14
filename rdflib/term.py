@@ -437,6 +437,7 @@ class BNode(Identifier):
         skolem = "%s%s" % (basepath, text_type(self))
         return URIRef(urljoin(authority, skolem))
 
+
 class EmbeddedTriple:
     """
     Triple: Needed for RDF*
@@ -452,7 +453,7 @@ class EmbeddedTriple:
         self._subject = subject
         self._predicate = predicate
         self._object = object
-        self._sid = sid
+        self._sid = sid #Statement Identifier
 
     def toPython(self):
         return self._subject.toPython() + self._predicate.toPython() + self._object.toPython()
