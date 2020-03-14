@@ -410,9 +410,16 @@ GraphRefAll = GraphRef | Param('graphiri', Keyword('DEFAULT')) | Param(
 GraphOrDefault = ParamList('graph', Keyword(
     'DEFAULT')) | Optional(Keyword('GRAPH')) + ParamList('graph', iri)
 
+# Inside a values clause the EmbeddedTriple must be fully resolvable.
+KnownEmbTP = Suppress('<<') + iri + (iri | A) + (iri | RDFLiteral | NumericLiteral | BooleanLiteral) + Suppress('>>')
+KnownEmbTP.setParseAction(lambda x:
+                          rdflib.EmbeddedTriple(subject=x[0],
+                                                predicate=x[1],
+                                                object=x[2]))
+
+
 # [65] DataBlockValue ::= iri | RDFLiteral | NumericLiteral | BooleanLiteral | 'UNDEF'
-DataBlockValue = iri | RDFLiteral | NumericLiteral | BooleanLiteral | Keyword(
-    'UNDEF')
+DataBlockValue = iri | RDFLiteral | NumericLiteral | BooleanLiteral | Keyword('UNDEF') | KnownEmbTP
 
 # [78] Verb ::= VarOrIri | A
 Verb = VarOrIri | A
@@ -435,7 +442,8 @@ GraphNode = VarOrTerm | TriplesNode
 #VarOrBlankNodeOrIriOrLitOrEmbTP = Forward()
 #VarOrBlankNodeOrIriOrLitOrEmbTP <<= Var | BlankNode | iri | RDFLiteral | NumericLiteral | BooleanLiteral | VarOrBlankNodeOrIriOrLitOrEmbTP
 VarOrBlankNodeOrIriOrLitOrEmbTP = Var | BlankNode | iri | RDFLiteral | NumericLiteral | BooleanLiteral
-EmbTP = Suppress('<<') + VarOrBlankNodeOrIriOrLitOrEmbTP + Verb+ VarOrBlankNodeOrIriOrLitOrEmbTP + Suppress('>>')
+
+EmbTP = Suppress('<<') + VarOrBlankNodeOrIriOrLitOrEmbTP + Verb + VarOrBlankNodeOrIriOrLitOrEmbTP + Suppress('>>')
 EmbTP.setParseAction(lambda x:
                      rdflib.EmbeddedTriple(subject=x[0],
                                            predicate=x[1],
