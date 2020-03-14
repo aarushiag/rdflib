@@ -1,5 +1,6 @@
 from rdflib import Graph
 from rdflib.namespace import RDF, Namespace
+from pyparsing import ParseException
 import unittest
 
 
@@ -92,6 +93,27 @@ class SparqlStarTests(unittest.TestCase):
         }''')
         rl = list(res)
         self.assertEqual(1 , len(rl))
+
+    def test_constant_sparql_star_values(self):
+        g = Graph()
+        g.parse(data=self.reif_as_subject, format="ttl")
+        res = g.query('''PREFIX ex:<http://example.org/> SELECT * WHERE {
+        VALUES(?reif) {(<< ex:subject ex:predicate ex:object>>)}
+        ?reif a ex:about  . 
+        }''')
+        rl = list(res)
+        self.assertEqual(1 , len(rl))
+
+    #This should fail as the embedded triple is not well formed
+    def test_non_constant_sparql_star_values(self):
+        g = Graph()
+        g.parse(data=self.reif_as_subject, format="ttl")
+        with self.assertRaises(ParseException):
+            g.query('''PREFIX ex:<http://example.org/> SELECT * WHERE {
+           VALUES(?reif) {(<< ex:subject ex:predicate ?o>>)}
+           ?reif a ex:about  . 
+           }''')
+
 
 if __name__ == '__main__':
     unittest.main()
