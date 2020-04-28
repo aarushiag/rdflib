@@ -79,3 +79,54 @@ class UniquenessError(Error):
     def __init__(self, values):
         Error.__init__(self, "\
 Uniqueness assumption is not fulfilled. Multiple values are: %s" % values)
+
+
+class DataSyntaxError(Error):
+    """Some kind of issue with the data. Think of allowed values in xml qnames etc."""
+
+    def __init__(self, msg):
+        Error.__init__(self, msg)
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+
+class CodeAssumesAnValidInput(Error):
+
+    def __init__(self, msg):
+        Error.__init__(self, msg)
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+
+class NotImplementedFunctionalityError(Error):
+
+    def __init__(self, msg):
+        Error.__init__(self, msg)
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+
+class ObjectStateNotReadyForFunctionalityError(Error):
+
+    def __init__(self, msg):
+        Error.__init__(self, msg)
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
+
+
+class SparqlEvaluationError(Error):
+
+    def __init__(self, msg):
+        Error.__init__(self, msg)
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg

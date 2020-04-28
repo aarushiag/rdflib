@@ -15,6 +15,7 @@ from pyparsing import (
     ParseResults, delimitedList)
 from pyparsing import CaselessKeyword as Keyword  # watch out :)
 # from pyparsing import Keyword as CaseSensitiveKeyword
+from rdflib.exceptions import CodeAssumesAnValidInput
 
 from .parserutils import Comp, Param, ParamList
 
@@ -1045,7 +1046,7 @@ def expandUnicodeEscapes(q):
         try:
             return unichr(int(m.group(1), 16))
         except:
-            raise Exception("Invalid unicode code point: " + m)
+            raise CodeAssumesAnValidInput("Invalid unicode code point: " + m)
 
     return expandUnicodeEscapes_re.sub(expand, q)
 

@@ -41,6 +41,9 @@ __all__ = [
 ]
 
 import logging
+
+from rdflib.exceptions import Error, DataSyntaxError, CodeAssumesAnValidInput
+
 logger = logging.getLogger(__name__)
 import warnings
 import math
@@ -313,7 +316,7 @@ class URIRef(Identifier):
                 skolems[bnode_id] = retval
                 return retval
         else:
-            raise Exception("<%s> is not a skolem URI" % self)
+            raise Error("<%s> is not a skolem URI" % self)
 
 
 class Genid(URIRef):
@@ -543,7 +546,7 @@ class Literal(Identifier):
                 "per http://www.w3.org/TR/rdf-concepts/#section-Graph-Literal")
 
         if lang and not _is_valid_langtag(lang):
-            raise Exception("'%s' is not a valid language tag!" % lang)
+            raise DataSyntaxError("'%s' is not a valid language tag!" % lang)
 
         if datatype:
             datatype = URIRef(datatype)
@@ -1629,7 +1632,7 @@ def bind(datatype, pythontype, constructor=None, lexicalizer=None, datatype_spec
                               or from the pythontype otherwise.  False by default
     """
     if datatype_specific and datatype is None:
-        raise Exception("No datatype given for a datatype-specific binding")
+        raise CodeAssumesAnValidInput("No datatype given for a datatype-specific binding")
 
     if datatype in _toPythonMapping:
         logger.warning("datatype '%s' was already bound. Rebinding." %
@@ -1653,7 +1656,7 @@ class Variable(Identifier):
 
     def __new__(cls, value):
         if len(value) == 0:
-            raise Exception(
+            raise CodeAssumesAnValidInput(
                 "Attempted to create variable with empty string as name!")
         if value[0] == '?':
             value = value[1:]
@@ -1779,7 +1782,7 @@ def _isEqualXMLNode(node, other):
 
     else:
         # should not happen, in fact
-        raise Exception(
+        raise CodeAssumesAnValidInput(
             'I dont know how to compare XML Node type: %s' % node.nodeType)
 
 

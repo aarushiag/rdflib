@@ -6,6 +6,7 @@ from collections import OrderedDict
 from pyparsing import TokenConverter, ParseResults, originalTextFor
 
 from rdflib import BNode, Variable, URIRef
+from rdflib.exceptions import CodeAssumesAnValidInput
 
 DEBUG = True
 DEBUG = False
@@ -60,7 +61,7 @@ def value(ctx, val, variables=False, errors=False):
     if isinstance(val, Expr):
         return val.eval(ctx)  # recurse?
     elif isinstance(val, CompValue):
-        raise Exception("What do I do with this CompValue? %s" % val)
+        raise CodeAssumesAnValidInput("What do I do with this CompValue? %s" % val)
 
     elif isinstance(val, list):
         return [value(ctx, x, variables, errors) for x in val]

@@ -1,3 +1,4 @@
+from rdflib.exceptions import CodeAssumesAnValidInput
 from six import PY3
 
 
@@ -324,7 +325,7 @@ class MulPath(Path):
             self.zero = False
             self.more = True
         else:
-            raise Exception('Unknown modifier %s' % mod)
+            raise CodeAssumesAnValidInput('Unknown modifier %s' % mod)
 
     def eval(self, graph, subj=None, obj=None, first=True):
         if self.zero and first:
@@ -420,7 +421,7 @@ class NegatedPath(Path):
         elif isinstance(arg, AlternativePath):
             self.args = arg.args
         else:
-            raise Exception(
+            raise CodeAssumesAnValidInput(
                 'Can only negate URIRefs, InvPaths or ' +
                 'AlternativePaths, not: %s' % (arg,))
 
@@ -434,7 +435,7 @@ class NegatedPath(Path):
                     if (o, a.arg, s) in graph:
                         break
                 else:
-                    raise Exception('Invalid path in NegatedPath: %s' % a)
+                    raise CodeAssumesAnValidInput('Invalid path in NegatedPath: %s' % a)
             else:
                 yield s, o
 
@@ -454,7 +455,7 @@ def path_alternative(self, other):
     alternative path
     """
     if not isinstance(other, (URIRef, Path)):
-        raise Exception('Only URIRefs or Paths can be in paths!')
+        raise CodeAssumesAnValidInput('Only URIRefs or Paths can be in paths!')
     return AlternativePath(self, other)
 
 
@@ -463,7 +464,7 @@ def path_sequence(self, other):
     sequence path
     """
     if not isinstance(other, (URIRef, Path)):
-        raise Exception('Only URIRefs or Paths can be in paths!')
+        raise CodeAssumesAnValidInput('Only URIRefs or Paths can be in paths!')
     return SequencePath(self, other)
 
 

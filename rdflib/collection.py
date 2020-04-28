@@ -2,6 +2,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from rdflib.exceptions import CodeAssumesAnValidInput
 from rdflib.namespace import RDF
 from rdflib.term import BNode
 from rdflib.term import Literal
@@ -101,7 +102,7 @@ class Collection(object):
                 if newLink == [RDF.nil]:
                     raise ValueError("%s is not in %s" % (item, self.uri))
                 elif not newLink:
-                    raise Exception("Malformed RDF Collection: %s" % self.uri)
+                    raise CodeAssumesAnValidInput("Malformed RDF Collection: %s" % self.uri)
                 else:
                     assert len(newLink) == 1, \
                         "Malformed RDF Collection: %s" % self.uri

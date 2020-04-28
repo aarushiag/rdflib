@@ -21,6 +21,7 @@ import requests
 from pyparsing import ParseException
 
 from rdflib import Variable, Graph, BNode, URIRef, Literal
+from rdflib.exceptions import CodeAssumesAnValidInput, NotImplementedFunctionalityError, SparqlEvaluationError
 from six import iteritems, itervalues
 
 from rdflib.plugins.sparql import CUSTOM_EVALS
@@ -269,10 +270,10 @@ def evalPart(ctx, part):
         #raise Exception('ServiceGraphPattern not implemented')
 
     elif part.name == 'DescribeQuery':
-        raise Exception('DESCRIBE not implemented')
+        raise NotImplementedFunctionalityError('DESCRIBE not implemented')
 
     else:
-        raise Exception('I dont know: %s' % part.name)
+        raise CodeAssumesAnValidInput('I dont know: %s' % part.name)
 
 def evalServiceQuery(ctx, part):
     res = {}
@@ -302,7 +303,7 @@ def evalServiceQuery(ctx, part):
                     for bound in _yieldBindingsFromServiceCallResult(ctx, r, variables):
                         yield bound
         else:
-            raise Exception("Service: %s responded with code: %s", service_url, response.status_code);
+            raise SparqlEvaluationError("Service: %s responded with code: %s", service_url, response.status_code);
 
 
 """
@@ -507,7 +508,7 @@ def evalQuery(graph, query, initBindings, base=None):
 
     if main.datasetClause:
         if ctx.dataset is None:
-            raise Exception(
+            raise NotImplementedFunctionalityError(
                 "Non-conjunctive-graph doesn't know about " +
                 "graphs! Try a query without FROM (NAMED).")
 

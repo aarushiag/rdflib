@@ -5,6 +5,7 @@ Code for carrying out Update Operations
 """
 
 from rdflib import Graph, Variable
+from rdflib.exceptions import NotImplementedFunctionalityError, CodeAssumesAnValidInput
 
 from six import iteritems
 
@@ -52,8 +53,8 @@ def evalCreate(ctx, u):
     """
     g = ctx.dataset.get_context(u.graphiri)
     if len(g) > 0:
-        raise Exception("Graph %s already exists." % g.identifier)
-    raise Exception("Create not implemented!")
+        raise CodeAssumesAnValidInput("Graph %s already exists." % g.identifier)
+    raise NotImplementedFunctionalityError("Create not implemented!")
 
 
 def evalClear(ctx, u):
@@ -306,7 +307,7 @@ def evalUpdate(graph, update, initBindings={}):
             elif u.name == 'Modify':
                 evalModify(ctx, u)
             else:
-                raise Exception('Unknown update operation: %s' % (u,))
+                raise CodeAssumesAnValidInput('Unknown update operation: %s' % (u,))
         except:
             if not u.silent:
                 raise

@@ -1,5 +1,6 @@
 import collections
 
+from rdflib.exceptions import CodeAssumesAnValidInput
 from rdflib.term import Variable, Literal, BNode, URIRef
 
 from rdflib.plugins.sparql.operators import EBV
@@ -49,7 +50,7 @@ def _ebv(expr, ctx):
         except SPARQLError:
             return False  # filter error == False
     elif isinstance(expr, CompValue):
-        raise Exception(
+        raise CodeAssumesAnValidInput(
             "Weird - filter got a CompValue without evalfn! %r" % expr)
     elif isinstance(expr, Variable):
         try:
@@ -73,10 +74,10 @@ def _eval(expr, ctx, raise_not_bound_error=True):
             else:
                 return None
     elif isinstance(expr, CompValue):
-        raise Exception(
+        raise CodeAssumesAnValidInput(
             "Weird - _eval got a CompValue without evalfn! %r" % expr)
     else:
-        raise Exception("Cannot eval thing: %s (%s)" % (expr, type(expr)))
+        raise CodeAssumesAnValidInput("Cannot eval thing: %s (%s)" % (expr, type(expr)))
 
 
 def _filter(a, expr):

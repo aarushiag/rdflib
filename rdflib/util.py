@@ -42,7 +42,7 @@ from time import timezone
 
 from os.path import splitext
 
-from rdflib.exceptions import ContextTypeError
+from rdflib.exceptions import ContextTypeError, CodeAssumesAnValidInput
 from rdflib.exceptions import ObjectTypeError
 from rdflib.exceptions import PredicateTypeError
 from rdflib.exceptions import SubjectTypeError
@@ -123,7 +123,7 @@ def to_term(s, default=None):
         return BNode(s)
     else:
         msg = "Unrecognised term syntax: '%s'" % s
-        raise Exception(msg)
+        raise CodeAssumesAnValidInput(msg)
 
 
 def from_n3(s, default=None, backend=None, nsm=None):

@@ -24,7 +24,7 @@ CUSTOM_EVALS = {}
 Custom evaluation functions
 
 These must be functions taking (ctx, part) and raise
-NotImplementedError if they cannot handle a certain part
+NotImplementedFunctionalityError if they cannot handle a certain part
 """
 
 

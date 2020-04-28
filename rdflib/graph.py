@@ -1663,7 +1663,7 @@ class Dataset(ConjunctiveGraph):
         super(Dataset, self).__init__(store=store, identifier=None)
 
         if not self.store.graph_aware:
-            raise Exception("DataSet must be backed by a graph-aware store!")
+            raise NotImplementedError("DataSet must be backed by a graph-aware store!")
         self.default_context = Graph(
             store=self.store, identifier=DATASET_DEFAULT_GRAPH_ID, base=default_graph_base
         )

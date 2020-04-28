@@ -15,6 +15,7 @@ import collections
 from functools import reduce
 
 from rdflib import Literal, Variable, URIRef, BNode
+from rdflib.exceptions import CodeAssumesAnValidInput
 
 from rdflib.plugins.sparql.sparql import Prologue, Query
 from rdflib.plugins.sparql.parserutils import CompValue, Expr
@@ -132,7 +133,7 @@ def triples(l):
 
     l = reduce(lambda x, y: x + y, l)
     if (len(l) % 3) != 0:
-        raise Exception('these aint triples')
+        raise CodeAssumesAnValidInput('these aint triples')
     return reorderTriples((l[x], l[x + 1], l[x + 2])
                           for x in range(0, len(l), 3))
 
@@ -175,7 +176,7 @@ def translatePath(p):
             else:
                 if isinstance(p.part, list):
                     if len(p.part) != 1:
-                        raise Exception('Denkfehler!')
+                        raise CodeAssumesAnValidInput('Denkfehler!')
 
                     return MulPath(p.part[0], p.mod)
                 else:
@@ -184,7 +185,7 @@ def translatePath(p):
         elif p.name == 'PathEltOrInverse':
             if isinstance(p.part, list):
                 if len(p.part) != 1:
-                    raise Exception('Denkfehler!')
+                    raise CodeAssumesAnValidInput('Denkfehler!')
                 return InvPath(p.part[0])
             else:
                 return InvPath(p.part)
@@ -309,7 +310,7 @@ def translateGroupGraphPattern(graphPattern):
             G = Extend(G, p.expr, p.var)
 
         else:
-            raise Exception('Unknown part in GroupGraphPattern: %s - %s' %
+            raise CodeAssumesAnValidInput('Unknown part in GroupGraphPattern: %s - %s' %
                             (type(p), p.name))
 
     if filters:
@@ -597,7 +598,7 @@ def translate(q):
 
                 E.append((v.expr, v.evar))
             else:
-                raise Exception("I expected a var or evar here!")
+                raise CodeAssumesAnValidInput("I expected a var or evar here!")
 
     for e, v in E:
         M = Extend(M, e, v)
@@ -718,7 +719,7 @@ def translateUpdate1(u, prologue):
                 "quads"] = translateQuads(u.insert.quads)
         u["where"] = translateGroupGraphPattern(u.where)
     else:
-        raise Exception('Unknown type of update operation: %s' % u)
+        raise CodeAssumesAnValidInput('Unknown type of update operation: %s' % u)
 
     u.prologue = prologue
     return u

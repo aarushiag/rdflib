@@ -43,6 +43,7 @@ from decimal import Decimal
 
 from uuid import uuid4
 
+from rdflib.exceptions import CodeAssumesAnValidInput
 from rdflib.term import URIRef, BNode, Literal, Variable, _XSD_PFX, _unique_id
 from rdflib.graph import QuotedGraph, ConjunctiveGraph, Graph
 
@@ -316,7 +317,7 @@ def unicodeExpand(m):
     try:
         return unichr(int(m.group(1), 16))
     except:
-        raise Exception("Invalid unicode code point: " + m.group(1))
+        raise CodeAssumesAnValidInput("Invalid unicode code point: " + m.group(1))
 
 if narrow_build:
     def unicodeExpand(m):
@@ -1769,7 +1770,7 @@ class RDFSink(object):
         f, p, s, o = quadruple
 
         if hasattr(p, 'formula'):
-            raise Exception("Formula used as predicate")
+            raise CodeAssumesAnValidInput("Formula used as predicate")
 
         s = self.normalise(f, s)
         p = self.normalise(f, p)
@@ -1873,7 +1874,7 @@ class TurtleParser(Parser):
     def parse(self, source, graph, encoding="utf-8", turtle=True):
 
         if encoding not in [None, "utf-8"]:
-            raise Exception(
+            raise CodeAssumesAnValidInput(
                 ("N3/Turtle files are always utf-8 encoded, ",
                  "I was passed: %s") % encoding)
 

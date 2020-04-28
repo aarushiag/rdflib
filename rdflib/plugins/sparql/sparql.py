@@ -5,6 +5,7 @@ import itertools
 import datetime
 
 import isodate
+from rdflib.exceptions import NotImplementedFunctionalityError, CodeAssumesAnValidInput
 from six import text_type, iteritems
 
 from rdflib.compat import Mapping, MutableMapping
@@ -73,7 +74,7 @@ class Bindings(MutableMapping):
         self._d[key] = value
 
     def __delitem__(self, key):
-        raise Exception("DelItem is not implemented!")
+        raise NotImplementedFunctionalityError("DelItem is not implemented!")
 
     def __len__(self):
         i = 0
@@ -262,7 +263,7 @@ class QueryContext(object):
 
     def _get_dataset(self):
         if self._dataset is None:
-            raise Exception(
+            raise NotImplementedFunctionalityError(
                 'You performed a query operation requiring ' +
                 'a dataset (i.e. ConjunctiveGraph), but ' +
                 'operating currently on a single graph.')
@@ -284,7 +285,7 @@ class QueryContext(object):
             try:
                 return graph.load(source, format='nt', **kwargs)
             except:
-                raise Exception(
+                raise CodeAssumesAnValidInput(
                     "Could not load %s as either RDF/XML, N3 or NTriples" % (
                         source))
 
@@ -373,7 +374,7 @@ class Prologue(object):
     def resolvePName(self, prefix, localname):
         ns = self.namespace_manager.store.namespace(prefix or "")
         if ns is None:
-            raise Exception('Unknown namespace prefix : %s' % prefix)
+            raise CodeAssumesAnValidInput('Unknown namespace prefix : %s' % prefix)
         return URIRef(ns + (localname or ""))
 
     def bind(self, prefix, uri):

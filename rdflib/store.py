@@ -382,7 +382,7 @@ class Store(object):
         exists.
         :param graph: a Graph instance
         """
-        raise Exception("Graph method called on non-graph_aware store")
+        raise NotImplementedError("Graph method called on non-graph_aware store")
 
     def remove_graph(self, graph):
         """
@@ -391,4 +391,4 @@ class Store(object):
 
         :param graphid: a Graph instance
         """
-        raise Exception("Graph method called on non-graph_aware store")
+        raise NotImplementedError("Graph method called on non-graph_aware store")

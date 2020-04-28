@@ -7,6 +7,9 @@ This was first done in layer-cake, and then ported to RDFLib
 """
 
 # Defines some SPARQL keywords
+from rdflib.exceptions import NotImplementedFunctionalityError, CodeAssumesAnValidInput, \
+    ObjectStateNotReadyForFunctionalityError
+
 LIMIT = 'LIMIT'
 OFFSET = 'OFFSET'
 ORDERBY = 'ORDER BY'
@@ -30,7 +33,7 @@ BNODE_IDENT_PATTERN = re.compile('(?P<label>_\:[^\s]+)')
 
 def _node_to_sparql(node):
     if isinstance(node, BNode):
-        raise Exception(
+        raise NotImplementedFunctionalityError(
             "SPARQLStore does not support BNodes! "
             "See http://www.w3.org/TR/sparql11-query/#BGPsparqlBNodes"
         )
@@ -121,7 +124,7 @@ class SPARQLStore(SPARQLConnector, Store):
         if create==True an exception is thrown.
         """
         if create:
-            raise Exception("Cannot create a SPARQL Endpoint")
+            raise CodeAssumesAnValidInput("Cannot create a SPARQL Endpoint")
 
         self.query_endpoint = configuration
 
@@ -174,7 +177,7 @@ class SPARQLStore(SPARQLConnector, Store):
 
         if initBindings:
             if not self.sparql11:
-                raise Exception(
+                raise NotImplementedFunctionalityError(
                     "initBindings not supported for SPARQL 1.0 Endpoints.")
             v = list(initBindings)
 
@@ -499,7 +502,7 @@ class SPARQLUpdateStore(SPARQLStore):
         """
 
         if create:
-            raise Exception("Cannot create a SPARQL Endpoint")
+            raise NotImplementedFunctionalityError("Cannot create a SPARQL Endpoint")
 
         if isinstance(configuration, tuple):
             self.query_endpoint = configuration[0]
@@ -534,7 +537,7 @@ class SPARQLUpdateStore(SPARQLStore):
         """ Add a triple to the store of triples. """
 
         if not self.update_endpoint:
-            raise Exception("UpdateEndpoint is not set - call 'open'")
+            raise ObjectStateNotReadyForFunctionalityError("UpdateEndpoint is not set - call 'open'")
 
         assert not quoted
         (subject, predicate, obj) = spo
@@ -553,7 +556,7 @@ class SPARQLUpdateStore(SPARQLStore):
     def addN(self, quads):
         """ Add a list of quads to the store. """
         if not self.update_endpoint:
-            raise Exception("UpdateEndpoint is not set - call 'open'")
+            raise ObjectStateNotReadyForFunctionalityError("UpdateEndpoint is not set - call 'open'")
 
         contexts = collections.defaultdict(list)
         for subject, predicate, obj, context in quads:
@@ -575,7 +578,7 @@ class SPARQLUpdateStore(SPARQLStore):
     def remove(self, spo, context):
         """ Remove a triple from the store """
         if not self.update_endpoint:
-            raise Exception("UpdateEndpoint is not set - call 'open'")
+            raise ObjectStateNotReadyForFunctionalityError("UpdateEndpoint is not set - call 'open'")
 
         (subject, predicate, obj) = spo
         if not subject:
@@ -643,7 +646,7 @@ class SPARQLUpdateStore(SPARQLStore):
 
         """
         if not self.update_endpoint:
-            raise Exception("UpdateEndpoint is not set - call 'open'")
+            raise ObjectStateNotReadyForFunctionalityError("UpdateEndpoint is not set - call 'open'")
 
         self.debug = DEBUG
         assert isinstance(query, string_types)

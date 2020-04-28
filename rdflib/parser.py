@@ -174,7 +174,7 @@ def create_input_source(source=None, publicID=None,
                 elif hasattr(f, "name"):
                     input_source.setSystemId(f.name)
             else:
-                raise Exception("Unexpected type '%s' for source '%s'" %
+                raise TypeError("Unexpected type '%s' for source '%s'" %
                                 (type(source), source))
 
     absolute_location = None  # Further to fix for issue 130

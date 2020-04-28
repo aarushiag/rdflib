@@ -1,4 +1,5 @@
 from rdflib import Literal, XSD
+from rdflib.exceptions import NotImplementedFunctionalityError
 
 from six import text_type, itervalues
 from rdflib.plugins.sparql.evalutils import _eval, NotBoundError, _val
@@ -247,7 +248,7 @@ class Aggregator(object):
         for a in aggregations:
             accumulator_class = self.accumulator_classes.get(a.name)
             if accumulator_class is None:
-                raise Exception("Unknown aggregate function " + a.name)
+                raise NotImplementedFunctionalityError("Unknown aggregate function " + a.name)
             self.accumulators[a.res] = accumulator_class(a)
 
     def update(self, row):
