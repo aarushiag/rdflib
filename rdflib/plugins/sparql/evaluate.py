@@ -137,6 +137,8 @@ def _convert_embedded_triple(t):
         v3 = Variable('__' + t[2].toPython())  #Replacing object by a variable if Embedded Triple
         return t[0], t[1], v3
 
+    return t
+
 # Embedded Triple Pattern
 def reifyEmbTP(ctx, reif, triples):
     from rdflib import RDF
